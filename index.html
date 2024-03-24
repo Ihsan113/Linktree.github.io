@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linktree Tools</title>
+  <style>
+    /* CSS untuk animasi loading */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      display: none;
+    }
+
+    .loading-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .loading-text {
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
+    }
+    /* Akhir CSS untuk animasi loading */
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    textarea,
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      margin-top: 5px;
+    }
+
+    textarea {
+      height: 100px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #background-image-input {
+      margin-bottom: 20px;
+    }
+
+    #link-profil {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #link-profil a {
+      text-decoration: none;
+      color: #007bff;
+    }
+
+    #link-profil a:hover {
+      text-decoration: underline;
+    }
+
+    /* CSS untuk tombol bagikan profil */
+    #btn-bagikan-profil {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    #btn-bagikan-profil button {
+      background-color: #28a745;
+    }
+
+    #btn-bagikan-profil button:hover {
+      background-color: #218838;
+    }
+    /* Akhir CSS untuk tombol bagikan profil */
+  </style>
+</head>
+<body>
+  <!-- Animasi loading overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner">
+      <div class="loading-text" id="loading-text">Menyimpan...</div>
+      <div class="loader"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Linktree Tools</h1>
+    <form id="linktree-form">
+      <div class="form-group">
+        <label for="background-image-input">Pilih Gambar Latar Belakang:</label>
+        <input type="file" id="background-image-input">
+      </div>
+      <div class="form-group">
+        <label for="profile-image">Upload Gambar Profil:</label>
+        <input type="file" id="profile-image">
+      </div>
+     
+      <div class="form-group">
+        <label for="name">Nama:</label>
+        <input type="text" id="name">
+      </div>
+      <div class="form-group">
+        <label for="about">About:</label>
+        <textarea id="about"></textarea>
+      </div>
+       <h3>masukkan link media sosial </h3>
+      <p>Gak wajib di isi semua</p>
+      <div class="form-group">
+        <label for="whatsapp">WhatsApp:</label>
+        <input type="text" id="whatsapp">
+      </div>
+      <div class="form-group">
+        <label for="facebook">Facebook:</label>
+        <input type="text" id="facebook">
+      </div>
+      <div class="form-group">
+        <label for="youtube">YouTube:</label>
+        <input type="text" id="youtube">
+      </div>
+      <div class="form-group">
+        <label for="tiktok">TikTok:</label>
+        <input type="text" id="tiktok">
+      </div>
+      <div class="form-group">
+        <label for="instagram">Instagram:</label>
+        <input type="text" id="instagram">
+      </div>
+      <button type="button" onclick="simpanData()">Simpan</button>
+      <!-- Tombol Bagikan Profil -->
+      <div id="btn-bagikan-profil">
+        <button type="button" id="btn-bagikan" style="display: none;" onclick="bagikanProfil()">Bagikan Profil</button>
+      </div>
+    </form>
+    <div id="link-profil"></div> <!-- Tempat tombol "Link Profil" akan ditampilkan -->
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
+
+  <script>
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyAREEgVnS1M_JgvThBKIBw-vP_t6WJgs7U",
+      authDomain: "poco-m5-dd083.firebaseapp.com",
+      databaseURL: "https://poco-m5-dd083-default-rtdb.firebaseio.com",
+      projectId: "poco-m5-dd083",
+      storageBucket: "poco-m5-dd083.appspot.com",
+      messagingSenderId: "590036832627",
+      appId: "1:590036832627:web:a9c27ddbd9e1db309db506",
+      measurementId: "G-LGWN38TY4K"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    // Fungsi untuk menampilkan animasi loading
+    function showLoading() {
+      document.getElementById("loading-overlay").style.display = "block";
+    }
+
+    // Fungsi untuk menyembunyikan animasi loading
+    function hideLoading() {
+      document.getElementById("loading-overlay").style.display = "none";
+    }
+
+    // Fungsi untuk menyimpan data ke Firebase
+    function simpanData() {
+      showLoading(); // Memanggil fungsi untuk menampilkan animasi loading
+
+      const backgroundImage = document.getElementById("background-image-input").files[0];
+      const profileImage = document.getElementById("profile-image").files[0];
+      const formData = {
+        name: document.getElementById("name").value,
+        about: document.getElementById("about").value,
+        whatsapp: document.getElementById("whatsapp").value,
+        facebook: document.getElementById("facebook").value,
+        youtube: document.getElementById("youtube").value,
+        tiktok: document.getElementById("tiktok").value,
+        instagram: document.getElementById("instagram").value
+      };
+
+      // Simpan gambar latar belakang ke Firebase Storage
+      const backgroundRef = firebase.storage().ref().child(`backgrounds/${backgroundImage.name}`);
+      backgroundRef.put(backgroundImage)
+        .then(snapshot => {
+          return snapshot.ref.getDownloadURL();
+        })
+        .then(backgroundURL => {
+          formData.backgroundImage = backgroundURL;
+
+          // Simpan gambar profil ke Firebase Storage
+          const profileRef = firebase.storage().ref().child(`profiles/${profileImage.name}`);
+          return profileRef.put(profileImage);
+        })
+        .then(snapshot => {
+          return snapshot.ref.getDownloadURL();
+        })
+        .then(profileURL => {
+          formData.profileImage = profileURL;
+
+          // Setelah kedua gambar disimpan, simpan data formulir ke Firebase Database
+          return firebase.database().ref('profiles').push(formData);
+        })
+        .then(snapshot => {
+          hideLoading(); // Memanggil fungsi untuk menyembunyikan animasi loading
+          // Mendapatkan kunci (key) dari data yang baru saja disimpan
+          const key = snapshot.key;
+          // Mendapatkan URL halaman profil dengan menambahkan token sebagai query parameter
+          const profileURL = `profil.html?token=${key}`;
+          // Menampilkan tombol "Link Profil" dengan URL yang sesuai
+          document.getElementById("link-profil").innerHTML = `<a href="${profileURL}">Link Profil</a>`;
+          document.getElementById("btn-bagikan").style.display = "inline"; // Menampilkan tombol "Bagikan Profil"
+          alert('Berhasil disimpan selamat!');
+        })
+        .catch(error => {
+          hideLoading(); // Memanggil fungsi untuk menyembunyikan animasi loading
+          console.error('Terjadi kesalahan:', error);
+          alert('Terjadi kesalahan saat menyimpan data ke Firebase.');
+        });
+    }
+
+ 
+  // Fungsi untuk menampilkan tombol "Bagikan Profil"
+  function bagikanProfil() {
+    const profileURL = document.getElementById("link-profil").querySelector("a").getAttribute("href");
+
+    // Memeriksa apakah browser mendukung fitur Web Share API
+    if (navigator.share) {
+      navigator.share({
+        title: 'Bagikan Profil Anda',
+        text: '',
+        url: profileURL
+      })
+      .then(() => console.log('Profil berhasil dibagikan'))
+      .catch((error) => console.error('Gagal membagikan profil:', error));
+    } else {
+      // Jika browser tidak mendukung Web Share API, tampilkan pesan alternatif
+      alert('Browser Anda tidak mendukung fitur berbagi. Silakan bagikan profil secara manual.');
+    }
+  }
+
+
+  </script>
+</body>
+</html>

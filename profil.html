@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Saya</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      background-size: cover; /* Membuat latar belakang menyesuaikan ukuran layar */
+      background-repeat: no-repeat;
+      min-height: 100vh; /* Mengisi seluruh tinggi layar */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      background-color: #0000006f;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border: 2px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .profile-info {
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center; /* Memastikan teks berada di tengah */
+    }
+
+    .profile-info label {
+      font-weight: bold;
+      color: white;
+    }
+
+    .profile-info p {
+      margin-top: 5px;
+      font-size: 19px;
+      color: white;
+    }
+
+    .profile-image {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      display: block;
+      margin: 0 auto 20px;
+      object-fit: cover;
+      border: 5px solid #fff;
+    }
+
+    .social-icons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .social-card {
+      display: none;
+      align-items: center;
+      width: 290px;
+      padding: 10px 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .social-card:hover {
+      background-color: #f0f0f0;
+    }
+
+    .social-icon {
+      margin-right: 10px;
+      font-size: 24px;
+      color: #333;
+    }
+
+    .social-text {
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body style="background-image: url('background.jpg')">
+  <div class="container">
+    <h1>Profil Saya</h1>
+    <img id="profile-image" class="profile-image" src="" alt="Foto Profil">
+    <div class="profile-info">
+      <label for="name"></label>
+      <p id="name"></p>
+    </div>
+    <div class="profile-info">
+      <label for="about"></label>
+      <p id="about"></p>
+    </div>
+   <hr style=" margin: 20px 0; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);">
+
+ <!-- HR dengan style yang lebih fleksibel -->
+    <div class="social-icons">
+      <div id="whatsapp-card" class="social-card">
+        <i class="fab fa-whatsapp social-icon"></i>
+        <span class="social-text"></span>
+      </div>
+      <div id="facebook-card" class="social-card">
+        <i class="fab fa-facebook social-icon"></i>
+        <span class="social-text"></span>
+      </div>
+      <div id="youtube-card" class="social-card">
+        <i class="fab fa-youtube social-icon"></i>
+        <span class="social-text"></span>
+      </div>
+      <div id="tiktok-card" class="social-card">
+        <i class="fab fa-tiktok social-icon"></i>
+        <span class="social-text"></span>
+      </div>
+      <div id="instagram-card" class="social-card">
+        <i class="fab fa-instagram social-icon"></i>
+        <span class="social-text"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAREEgVnS1M_JgvThBKIBw-vP_t6WJgs7U",
+      authDomain: "poco-m5-dd083.firebaseapp.com",
+      databaseURL: "https://poco-m5-dd083-default-rtdb.firebaseio.com",
+      projectId: "poco-m5-dd083",
+      storageBucket: "poco-m5-dd083.appspot.com",
+      messagingSenderId: "590036832627",
+      appId: "1:590036832627:web:a9c27ddbd9e1db309db506",
+      measurementId: "G-LGWN38TY4K"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    firebase.database().ref('profiles/' + token).once('value')
+      .then((snapshot) => {
+        const profileData = snapshot.val();
+        document.getElementById("name").textContent = profileData.name;
+        document.getElementById("about").textContent = profileData.about;
+        document.getElementById("profile-image").src = profileData.profileImage;
+        
+        document.body.style.backgroundImage = `url('${profileData.backgroundImage}')`; 
+        
+        if (profileData.whatsapp) {
+          document.getElementById("whatsapp-card").style.display = "flex";
+          document.getElementById("whatsapp-card").querySelector(".social-text").textContent = "WhatsApp";
+          document.getElementById("whatsapp-card").addEventListener("click", function() {
+            window.location.href = profileData.whatsapp;
+          });
+        }
+        if (profileData.facebook) {
+          document.getElementById("facebook-card").style.display = "flex";
+          document.getElementById("facebook-card").querySelector(".social-text").textContent = "Facebook";
+          document.getElementById("facebook-card").addEventListener("click", function() {
+            window.location.href = profileData.facebook;
+          });
+        }
+        if (profileData.youtube) {
+          document.getElementById("youtube-card").style.display = "flex";
+          document.getElementById("youtube-card").querySelector(".social-text").textContent = "YouTube";
+          document.getElementById("youtube-card").addEventListener("click", function() {
+            window.location.href = profileData.youtube;
+          });
+        }
+       
+        if (profileData.tiktok) {
+          document.getElementById("tiktok-card").style.display = "flex";
+          document.getElementById("tiktok-card").querySelector(".social-text").textContent = "TikTok";
+          document.getElementById("tiktok-card").addEventListener("click", function() {
+            window.location.href = profileData.tiktok;
+          });
+        }
+        if (profileData.instagram) {
+          document.getElementById("instagram-card").style.display = "flex";
+          document.getElementById("instagram-card").querySelector(".social-text").textContent = "Instagram";
+          document.getElementById("instagram-card").addEventListener("click", function() {
+            window.location.href = profileData.instagram;
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Terjadi kesalahan:', error);
+        alert('Data tidak ditemukan.');
+      });
+  </script>
+</body>
+</html>
+
